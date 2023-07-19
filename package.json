@@ -1,26 +1,31 @@
 {
-	"name": "bun-template",
-	"description": "TODO",
+	"name": "r6-dissect",
+	"description": "Bun API for Rainbow Six: Siege's Dissect (.rec) format.",
 	"module": "index.ts",
 	"type": "module",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"author": {
 		"name": "redraskal",
 		"url": "https://github.com/redraskal",
 		"email": "ben@ryben.dev"
 	},
-	"license": "",
+	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/redraskal/"
+		"url": "https://github.com/redraskal/r6-dissect-bun"
 	},
-	"bugs": "https://github.com/redraskal//issues",
-	"homepage": "https://github.com/redraskal/",
+	"bugs": "https://github.com/redraskal/r6-dissect-bun/issues",
+	"homepage": "https://github.com/redraskal/r6-dissect-bun",
+	"files": [
+		"index.ts",
+		"worker.ts",
+		"libr6dissect.so"
+	],
 	"scripts": {
 		"prettier": "prettier --write ."
 	},
 	"devDependencies": {
-		"bun-types": "latest",
+		"bun-types": "^0.6.14",
 		"prettier": "^3.0.0"
 	},
 	"peerDependencies": {
