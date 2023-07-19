@@ -11,6 +11,8 @@ bun i r6-dissect
 ## To read a replay file:
 
 ```ts
+import { dissect } from "r6-dissect";
+
 const { data, error } = await dissect("Match-2023-03-13_23-23-58-199-R01.rec");
 
 if (error) {
@@ -24,6 +26,8 @@ if (error) {
 ## To read a match:
 
 ```ts
+import { dissectMatch } from "r6-dissect";
+
 const { data, error } = await dissectMatch("Match-2023-03-13_23-23-58-199/");
 
 if (error) {
