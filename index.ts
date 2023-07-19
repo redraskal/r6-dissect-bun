@@ -107,7 +107,7 @@ export type MatchResponse = {
 export async function _read(path: string) {
 	return new Promise((resolve) => {
 		// @ts-ignore
-		const worker = new Worker("./worker.ts");
+		const worker = new Worker(new URL("worker.ts", import.meta.url).href);
 		worker.postMessage(path);
 		// @ts-ignore
 		worker.onmessage = function (event) {

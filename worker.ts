@@ -1,8 +1,9 @@
 import { dlopen, FFIType, suffix } from "bun:ffi";
+import { join } from "path";
 
 const {
 	symbols: { dissect_read },
-} = dlopen(`libr6dissect.${suffix}`, {
+} = dlopen(join(import.meta.dir, `libr6dissect.${suffix}`), {
 	dissect_read: {
 		args: [FFIType.cstring],
 		returns: FFIType.cstring,
