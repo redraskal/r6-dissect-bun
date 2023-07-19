@@ -19,7 +19,8 @@
 	"files": [
 		"index.ts",
 		"worker.ts",
-		"libr6dissect.so"
+		"libr6dissect.so",
+		"libr6dissect.dylib"
 	],
 	"os": [
 		"linux",
