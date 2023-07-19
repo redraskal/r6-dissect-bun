@@ -21,6 +21,9 @@
 		"worker.ts",
 		"libr6dissect.so"
 	],
+	"os": [
+		"linux"
+	],
 	"scripts": {
 		"prettier": "prettier --write ."
 	},
