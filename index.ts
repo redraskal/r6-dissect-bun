@@ -104,7 +104,7 @@ export type MatchResponse = {
 	data?: Match;
 };
 
-export async function _read(path: string) {
+async function _read(path: string) {
 	return new Promise((resolve) => {
 		// @ts-ignore
 		const worker = new Worker(new URL("worker.ts", import.meta.url).href);
