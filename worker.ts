@@ -1,6 +1,8 @@
 import { dlopen, FFIType, suffix } from "bun:ffi";
 import { join } from "path";
 
+declare var self: Worker;
+
 const {
 	symbols: { dissect_read },
 } = dlopen(join(import.meta.dir, `libr6dissect.${suffix}`), {
@@ -16,8 +18,6 @@ function _read(path: string) {
 	return JSON.parse(dissect_read(buf));
 }
 
-// @ts-ignore
 self.onmessage = (event: MessageEvent) => {
-	// @ts-ignore
 	postMessage(_read(event.data));
 };

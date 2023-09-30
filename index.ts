@@ -104,16 +104,18 @@ export type MatchResponse = {
 	data?: Match;
 };
 
+const worker = new Worker(new URL("worker.ts", import.meta.url).href);
+
 async function _read(path: string) {
 	return new Promise((resolve) => {
-		// @ts-ignore
-		const worker = new Worker(new URL("worker.ts", import.meta.url).href);
 		worker.postMessage(path);
-		// @ts-ignore
-		worker.onmessage = function (event) {
-			worker.terminate();
-			resolve(event.data);
-		};
+		worker.addEventListener(
+			"message",
+			(event) => {
+				resolve(event.data);
+			},
+			{ once: true }
+		);
 	});
 }
 
