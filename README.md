@@ -2,6 +2,12 @@
 
 Bun API for Rainbow Six: Siege's Dissect (.rec) format.
 
+## Features
+
+- Automatic r6-dissect library updates
+- Cross-platform support
+- Asynchronous Worker execution
+
 ## To install:
 
 ```bash
@@ -11,30 +17,32 @@ bun i r6-dissect
 ## To read a replay file:
 
 ```ts
-import { dissect } from "r6-dissect";
+import { Dissect } from "r6-dissect";
 
-const { data, error } = await dissect("Match-2023-03-13_23-23-58-199-R01.rec");
+const dissect = new Dissect();
 
-if (error) {
+try {
+	const replay = await dissect.replay("Match-2023-03-13_23-23-58-199-R01.rec");
+	console.log(replay.matchID); // "d74d2685-193f-4fee-831f-41f8c7792250"
+	console.log(replay.players[0].username); // "redraskal"
+} catch (error) {
 	console.error(error);
-} else {
-	console.log(data.matchID); // "d74d2685-193f-4fee-831f-41f8c7792250"
-	console.log(data.players[0].username); // "redraskal"
 }
 ```
 
 ## To read a match:
 
 ```ts
-import { dissectMatch } from "r6-dissect";
+import { Dissect } from "r6-dissect";
 
-const { data, error } = await dissectMatch("Match-2023-03-13_23-23-58-199/");
+const dissect = new Dissect();
 
-if (error) {
+try {
+	const match = await dissect.match("Match-2023-03-13_23-23-58-199/");
+	console.log(`redraskal has ${match.stats[0].kills} kills`); // "redraskal has 6 kills"
+	console.log(match.rounds[0].players[0].username); // "redraskal"
+} catch (error) {
 	console.error(error);
-} else {
-	console.log(`redraskal has ${data.stats[0].kills} kills`); // "redraskal has 6 kills"
-	console.log(data.rounds[0].players[0].username); // "redraskal"
 }
 ```
 
