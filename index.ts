@@ -194,6 +194,7 @@ export class Dissect {
 			smol: this.#options?.smol || false,
 			argv: [this.#options?.binaryPath || this.cache.lib().name!],
 		});
+		this.#worker.unref();
 	}
 
 	async #read(path: string) {
