@@ -3,7 +3,7 @@
 	"description": "Bun API for Rainbow Six: Siege's Dissect (.rec) format.",
 	"module": "index.ts",
 	"type": "module",
-	"version": "1.5.0",
+	"version": "1.6.0",
 	"author": {
 		"name": "redraskal",
 		"url": "https://github.com/redraskal",

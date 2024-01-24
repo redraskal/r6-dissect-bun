@@ -94,15 +94,9 @@ export type Match = {
 	stats: PlayerMatchStats[];
 };
 
-export type ReplayResponse = {
-	error?: string;
-	data?: Replay;
-};
-
-export type MatchResponse = {
-	error?: string;
-	data?: Match;
-};
+type Response<T> = { data: T; error?: never } | { error: string; data?: never };
+export type ReplayResponse = Response<Replay>;
+export type MatchResponse = Response<Match>;
 
 const worker = new Worker(new URL("worker.ts", import.meta.url).href);
 
@@ -120,9 +114,9 @@ async function _read(path: string) {
 }
 
 export async function dissect(path: string) {
-	return _read(path) as ReplayResponse;
+	return _read(path) as unknown as ReplayResponse;
 }
 
 export async function dissectMatch(path: string) {
-	return _read(path) as MatchResponse;
+	return _read(path) as unknown as MatchResponse;
 }
