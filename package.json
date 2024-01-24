@@ -18,13 +18,7 @@
 	"homepage": "https://github.com/redraskal/r6-dissect-bun",
 	"files": [
 		"index.ts",
-		"worker.ts",
-		"libr6dissect.so",
-		"libr6dissect.dylib"
-	],
-	"os": [
-		"linux",
-		"darwin"
+		"worker.ts"
 	],
 	"scripts": {
 		"prettier": "prettier --write ."

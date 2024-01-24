@@ -1,11 +1,10 @@
-import { dlopen, FFIType, suffix } from "bun:ffi";
-import { join } from "path";
+import { dlopen, FFIType } from "bun:ffi";
 
 declare var self: Worker;
 
 const {
 	symbols: { dissect_read },
-} = dlopen(join(import.meta.dir, `libr6dissect.${suffix}`), {
+} = dlopen(Bun.argv[2], {
 	dissect_read: {
 		args: [FFIType.cstring],
 		returns: FFIType.cstring,

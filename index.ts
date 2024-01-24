@@ -1,3 +1,9 @@
+import { suffix } from "bun:ffi";
+import path from "path";
+import { mkdir } from "fs/promises";
+import os from "node:os";
+import { $ } from "bun";
+
 export type Entity = {
 	name: string;
 	id: number;
@@ -94,29 +100,125 @@ export type Match = {
 	stats: PlayerMatchStats[];
 };
 
-type Response<T> = { data: T; error?: never } | { error: string; data?: never };
-export type ReplayResponse = Response<Replay>;
-export type MatchResponse = Response<Match>;
+class DissectCache {
+	#folder;
+	#lib;
+	#version;
+	#download;
 
-const worker = new Worker(new URL("worker.ts", import.meta.url).href);
+	constructor(folder: string = ".dissect") {
+		this.#folder = folder;
+		this.#lib = Bun.file(path.join(folder, `libr6dissect.${suffix}`));
+		this.#version = Bun.file(path.join(folder, `libr6dissect.${suffix}.version`));
+		this.#download = Bun.file(path.join(folder, ".download"));
+	}
 
-async function _read(path: string) {
-	return new Promise((resolve) => {
-		worker.postMessage(path);
-		worker.addEventListener(
-			"message",
-			(event) => {
-				resolve(event.data);
+	lib() {
+		return this.#lib;
+	}
+
+	async exists() {
+		return await this.#lib.exists();
+	}
+
+	async lastUpdateCheck() {
+		return (await this.#version.exists()) ? Date.now() - this.#version.lastModified : -1;
+	}
+
+	async version() {
+		if (!(await this.#version.exists())) return null;
+		return await this.#version.text();
+	}
+
+	async #fetchUpdateDetails() {
+		const response = (await fetch("https://api.github.com/repos/redraskal/r6-dissect/releases", {
+			headers: {
+				Accept: "application/vnd.github+json",
 			},
-			{ once: true }
-		);
-	});
+		}).then((res) => res.json())) as any[];
+		const release = response[0];
+		const target = `${os.platform()}-${os.arch() == "x64" ? "amd64" : os.arch()}`;
+		const asset = release.assets.find((asset: any) => asset.name.indexOf(target) > -1);
+		if (!asset) {
+			throw new Error(`Release not found for ${target}.`);
+		}
+		return {
+			version: release.tag_name,
+			url: asset.browser_download_url,
+		};
+	}
+
+	async update() {
+		const details = await this.#fetchUpdateDetails();
+		if ((await this.version()) != details.version) {
+			await mkdir(this.#folder, { recursive: true });
+			const response = await fetch(details.url);
+			await Bun.write(this.#download, response);
+			await $`tar zxf ${this.#download.name} -C ${this.#folder} ${path.basename(this.#lib.name!)} && rm ${this.#download.name}`;
+		}
+		await Bun.write(this.#version, details.version);
+	}
 }
 
-export async function dissect(path: string) {
-	return _read(path) as unknown as ReplayResponse;
+export interface DissectOptions {
+	binaryPath?: string;
+	cachePath?: string;
+	smol?: boolean;
 }
 
-export async function dissectMatch(path: string) {
-	return _read(path) as unknown as MatchResponse;
+export class Dissect {
+	#options?: DissectOptions;
+	readonly cache: DissectCache;
+	#worker?: Worker;
+
+	constructor(options?: DissectOptions) {
+		this.#options = options;
+		this.cache = new DissectCache(options?.cachePath);
+	}
+
+	async #init() {
+		if (!this.#options?.binaryPath) {
+			const exists = await this.cache.exists();
+			if (!exists || (await this.cache.lastUpdateCheck()) > 900000) {
+				try {
+					await this.cache.update();
+				} catch (err) {
+					if (!exists) {
+						throw err;
+					}
+				}
+			}
+		}
+		this.#worker = new Worker(new URL("worker.ts", import.meta.url).href, {
+			name: "r6-dissect",
+			smol: this.#options?.smol || false,
+			argv: [this.#options?.binaryPath || this.cache.lib().name!],
+		});
+	}
+
+	async #read(path: string) {
+		if (!this.#worker) await this.#init();
+		return new Promise((resolve, reject) => {
+			this.#worker!.postMessage(path);
+			this.#worker!.addEventListener(
+				"message",
+				(event) => {
+					if (event.data.error) {
+						reject(event.data.error);
+					} else {
+						resolve(event.data.data);
+					}
+				},
+				{ once: true }
+			);
+		});
+	}
+
+	async replay(path: string) {
+		return this.#read(path) as unknown as Replay;
+	}
+
+	async match(path: string) {
+		return this.#read(path) as unknown as Match;
+	}
 }
