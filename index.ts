@@ -137,7 +137,7 @@ class DissectCache {
 			},
 		}).then((res) => res.json())) as any[];
 		const release = response[0];
-		const target = `${os.platform()}-${os.arch() == "x64" ? "amd64" : os.arch()}`;
+		const target = `${os.platform() == "win32" ? "windows" : os.platform()}-${os.arch() == "x64" ? "amd64" : os.arch()}`;
 		const asset = release.assets.find((asset: any) => asset.name.indexOf(target) > -1);
 		if (!asset) {
 			throw new Error(`Release not found for ${target}.`);
